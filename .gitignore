@@ -1,0 +1,14 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# User-specific files
+*.rsuser
+
+# ASP.NET local settings
+appsettings.*.local.json

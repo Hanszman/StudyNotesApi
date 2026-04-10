@@ -1,0 +1,6 @@
+@StudyNotesApi_HostAddress = http://localhost:5084
+
+GET {{StudyNotesApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

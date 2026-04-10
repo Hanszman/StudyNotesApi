@@ -12,3 +12,13 @@
 
 # ASP.NET local settings
 appsettings.*.local.json
+
+# Local environment files
+.env
+
+# Local .NET CLI cache used in the sandbox
+.dotnet/
+
+# Test output
+TestResults/
+coverage/

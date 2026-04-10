@@ -59,12 +59,12 @@ O projeto foi pensado para ser simples no domínio, mas forte tecnicamente, para
 ## 3. Stack do projeto
 
 ### Backend
-- .NET 8
+- .NET 10
 - ASP.NET Core Web API
 - C#
 
 ### Persistência
-- Entity Framework Core
+- Entity Framework Core 9
 - MySQL
 - Pomelo.EntityFrameworkCore.MySql
 
@@ -711,16 +711,12 @@ Recomendação:
 Banco: **MySQL local**
 
 Sugestão de nome do banco:
-- `study_notes_api_db`
+- `study-notes-db`
 
 Sugestão de conexão local:
 
 ```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=study_notes_api_db
-DB_USER=root
-DB_PASSWORD=root
+ConnectionStrings__DefaultConnection=Server=localhost;Port=3306;Database=study-notes-db;User=root;Password=;
 ```
 
 ---
@@ -733,28 +729,23 @@ Crie um arquivo `.env.example` na raiz com o seguinte conteúdo:
 ASPNETCORE_ENVIRONMENT=Development
 ASPNETCORE_URLS=http://localhost:5080
 
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=study_notes_api_db
-DB_USER=root
-DB_PASSWORD=root
+ConnectionStrings__DefaultConnection=Server=localhost;Port=3306;Database=study-notes-db;User=root;Password=;
 
-JWT_SECRET=your-super-secret-key-with-at-least-32-characters
-JWT_ISSUER=StudyNotesApi
-JWT_AUDIENCE=StudyNotesApiUsers
-JWT_EXPIRATION_MINUTES=60
+Jwt__Secret=your-super-secret-key-with-at-least-32-characters
+Jwt__Issuer=StudyNotesApi
+Jwt__Audience=StudyNotesApiUsers
+Jwt__ExpirationMinutes=60
 ```
 
 ### Observações
-- em .NET, o `.env` não é carregado automaticamente por padrão como em Node
-- você pode:
-  - usar variáveis de ambiente do sistema
-  - usar `appsettings.Development.json`
-  - ou instalar lib para leitura de `.env`
-
-Para aprendizado, uma abordagem boa é:
-- manter `appsettings.json` e `appsettings.Development.json`
-- usar `.env.example` apenas como referência de valores esperados
+- neste repositório, o `.env` pode ser carregado manualmente no startup
+- priorize chaves compatíveis com o provider padrão do .NET:
+  - `ConnectionStrings__DefaultConnection`
+  - `Jwt__Secret`
+  - `Jwt__Issuer`
+  - `Jwt__Audience`
+  - `Jwt__ExpirationMinutes`
+- mantenha `appsettings.json` e `appsettings.Development.json` como fallback e documentação viva
 
 ---
 
@@ -763,7 +754,7 @@ Para aprendizado, uma abordagem boa é:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=3306;Database=study_notes_api_db;User=root;Password=root;"
+    "DefaultConnection": "Server=localhost;Port=3306;Database=study-notes-db;User=root;Password=;"
   },
   "Jwt": {
     "Secret": "your-super-secret-key-with-at-least-32-characters",
@@ -786,6 +777,11 @@ Para aprendizado, uma abordagem boa é:
 ## 21. Guia de implementação por etapas
 
 Essa parte é a mais importante para o Codex seguir item por item sem virar um bingo de arquivos aleatórios.
+
+Regra operacional deste repositório:
+- cada incremento funcional deve atualizar código, testes e README no mesmo lote
+- não deixar testes unitários ou documentação para o final da entrega
+- quando uma entidade entrar no projeto, seus comandos e observações de uso também devem entrar no README
 
 # Etapa 0 — Bootstrap da solution
 
@@ -1353,4 +1349,3 @@ Depois do V1, você pode evoluir para:
 - testes com cobertura alta
 
 É pequeno o bastante pra terminar, mas robusto o suficiente pra te ensinar padrão de projeto real.
-

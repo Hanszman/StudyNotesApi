@@ -56,8 +56,6 @@ if (-not (Test-Path $coverageReportPath)) {
     throw "Coverage report was not generated."
 }
 
-& dotnet tool run reportgenerator "-reports:$coverageReportPath" "-targetdir:$coverageReportDirectory" "-reporttypes:Html;TextSummary"
-
 [xml]$coverageXml = Get-Content -Path $coverageReportPath
 $fileCoverage = @{}
 
@@ -107,6 +105,43 @@ foreach ($classNode in $coverageXml.coverage.packages.package.classes.class) {
         }
     }
 }
+
+$packages = @($coverageXml.coverage.packages.package)
+foreach ($packageNode in $packages) {
+    $classesNode = $packageNode.classes
+    if ($null -eq $classesNode) {
+        continue
+    }
+
+    $classNodes = @($classesNode.class)
+    foreach ($classNode in $classNodes) {
+        $fileName = $classNode.filename
+        $shouldKeep = -not [string]::IsNullOrWhiteSpace($fileName) -and
+            $fileName.StartsWith($rootPath, [System.StringComparison]::OrdinalIgnoreCase)
+
+        if ($shouldKeep) {
+            $normalizedFileName = $fileName.Replace('\', '/')
+            foreach ($pattern in $excludedPatterns) {
+                if ($normalizedFileName -like $pattern) {
+                    $shouldKeep = $false
+                    break
+                }
+            }
+        }
+
+        if (-not $shouldKeep) {
+            [void]$classesNode.RemoveChild($classNode)
+        }
+    }
+
+    if ($classesNode.ChildNodes.Count -eq 0) {
+        [void]$packageNode.ParentNode.RemoveChild($packageNode)
+    }
+}
+
+$coverageXml.Save($coverageReportPath)
+
+& dotnet tool run reportgenerator "-reports:$coverageReportPath" "-targetdir:$coverageReportDirectory" "-reporttypes:Html;TextSummary" "-verbosity:Error"
 
 $summary = $fileCoverage.Values |
     Sort-Object File |

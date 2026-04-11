@@ -8,6 +8,8 @@ using StudyNotesApi.Api.Security.Jwt;
 using StudyNotesApi.Api.Security.PasswordHasher;
 using StudyNotesApi.Application.Interfaces.Security;
 using StudyNotesApi.Infrastructure.DependencyInjection;
+using StudyNotesApi.Application.Interfaces.Services;
+using StudyNotesApi.Application.Services;
 
 namespace StudyNotesApi.Api.Extensions;
 
@@ -40,6 +42,7 @@ public static class ServiceCollectionExtensions
             });
 
         services.AddAuthorization();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

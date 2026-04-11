@@ -27,6 +27,7 @@ We have completed the bootstrap step, the first domain modeling step, the EF Cor
 - JWT authentication is now configured in the API pipeline
 - password hashing now uses `Argon2id`
 - the Swagger UI is now prepared for Bearer token authentication
+- registration and login endpoints are now available
 
 ## Structure
 
@@ -201,6 +202,14 @@ Returns a JSON health report with:
   - API online status
   - database connectivity
 
+### `POST /api/auth/register`
+
+Registers a new user and returns the created user payload.
+
+### `POST /api/auth/login`
+
+Authenticates a user and returns a JWT Bearer token.
+
 ## Swagger
 
 When the API is running, open:
@@ -296,8 +305,8 @@ dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Rele
 .\coverage.cmd
 ```
 
-The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, and security components, a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
+The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, security components, and auth flow, plus a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
 
 ## Next step
 
-The next logical step is `Stage 6 - Auth`: registration, login, duplicate-email validation, password verification, token issuance, and the first public authentication endpoints.
+The next logical step is `Stage 7 - Categories CRUD`: category DTOs, service implementation, controller endpoints, paging/filtering/sorting, and authenticated user scoping.

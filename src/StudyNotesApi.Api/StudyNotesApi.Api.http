@@ -14,3 +14,24 @@ GET {{StudyNotesApi_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+POST {{StudyNotesApi_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Victor",
+  "email": "victor@email.com",
+  "password": "123456"
+}
+
+###
+
+POST {{StudyNotesApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "victor@email.com",
+  "password": "123456"
+}
+
+###

@@ -20,6 +20,8 @@ We have completed the bootstrap step, the first domain modeling step, the EF Cor
 - global exception handling is now centralized in middleware
 - the project already follows controller-based routing and Swagger discovery
 - test coverage validation is now available from a short root command
+- the application contracts layer is now in place with service, repository, and security interfaces
+- paging, sorting, and entity filter models are now ready for the service/repository implementations
 
 ## Structure
 
@@ -101,7 +103,7 @@ These commands work without extra parameters because the root folder contains [S
 ```powershell
 dotnet restore
 dotnet build
-dotnet test
+dotnet test -c Release
 dotnet tool restore
 ```
 
@@ -111,8 +113,10 @@ Use the explicit form when you want to target something specific:
 dotnet tool restore
 dotnet restore StudyNotesApi.sln
 dotnet build StudyNotesApi.sln
-dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj
+dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Release
 ```
+
+On this local Windows environment, `dotnet test` in `Debug` can be blocked intermittently by Windows App Control for the generated test assembly. `Release` is the reliable mode here, so the README and the coverage script both use it on purpose.
 
 ### Running the API
 
@@ -226,7 +230,7 @@ You can run coverage validation from the repository root with:
 This wrapper:
 
 - restores local .NET tools automatically
-- runs the unit test suite
+- runs the unit test suite in `Release`
 - fails if the tests fail
 - collects coverage with `dotnet-coverage`
 - generates a Cobertura coverage report
@@ -280,8 +284,8 @@ The current increment was validated with:
 
 ```powershell
 dotnet build StudyNotesApi.sln
-dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj
+dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Release
 .\coverage.cmd
 ```
 
-The solution now includes real unit tests for the domain and API foundation behavior, a short coverage command, global error handling, controller-based Swagger discovery, and the first infrastructure/migration setup.
+The solution now includes real unit tests for the domain, API foundation, and application contract models, a short coverage command, global error handling, controller-based Swagger discovery, and the first infrastructure/migration setup.

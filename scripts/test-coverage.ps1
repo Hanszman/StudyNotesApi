@@ -46,7 +46,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Running unit tests with coverage..." -ForegroundColor Cyan
-& dotnet dotnet-coverage collect dotnet test $testProjectPath --no-restore --output $coverageReportPath --output-format cobertura
+& dotnet dotnet-coverage collect dotnet test $testProjectPath -c Release --no-restore --output $coverageReportPath --output-format cobertura
 
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE

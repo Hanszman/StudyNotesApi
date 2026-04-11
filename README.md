@@ -4,14 +4,16 @@ REST API for study notes, built with ASP.NET Core, C#, EF Core, MySQL, Swagger, 
 
 ## Current status
 
-We have completed the bootstrap step of the blueprint:
+We have completed the bootstrap step and the first domain modeling step of the blueprint:
 
 - the solution has been reorganized into `src/` and `tests/`
 - the default `WeatherForecast` template code has been removed
 - Swagger is configured at a basic level
+- a standard API health endpoint is available at `/api/health`
 - the root `.env` file is loaded automatically during startup
 - local MySQL points to `study-notes-db` in XAMPP
-- the test project is scaffolded and ready for the first real unit tests in the next step
+- the core domain entities have been modeled in English
+- the unit test project now contains the first real tests for entity behavior
 
 ## Structure
 
@@ -123,17 +125,27 @@ When the API is running, open:
 http://localhost:5080/swagger
 ```
 
+## Health endpoint
+
+When the API is running, you can probe:
+
+```text
+http://localhost:5080/api/health
+```
+
+It currently returns a basic healthy response and is useful for quick smoke checks, scripts, and future container/orchestration readiness checks.
+
 ## Validation status
 
-The bootstrap was validated with:
+The current increment was validated with:
 
 ```powershell
 dotnet build StudyNotesApi.sln
 dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj
 ```
 
-At this stage the test project is present and executes correctly, but it still has no real tests yet. The first business tests will be added together with the first domain/application increments.
+The solution now includes real unit tests for the first domain entity behaviors.
 
 ## Next step
 
-The next logical step is `Stage 1 - Domain`: model `User`, `Category`, `Tag`, `Note`, and `NoteTag`, then follow up with the first unit tests as the domain and services start to gain behavior.
+The next logical step is `Stage 2 - Infrastructure/Data`: add the EF Core `DbContext`, entity mappings, MySQL configuration, and the first migration for the modeled domain entities.

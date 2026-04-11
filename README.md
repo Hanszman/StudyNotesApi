@@ -22,6 +22,8 @@ We have completed the bootstrap step, the first domain modeling step, the EF Cor
 - test coverage validation is now available from a short root command
 - the application contracts layer is now in place with service, repository, and security interfaces
 - paging, sorting, and entity filter models are now ready for the service/repository implementations
+- the infrastructure repository layer is now implemented against EF Core
+- repository queries now support user scoping, filters, paging, and validated sorting
 
 ## Structure
 
@@ -289,3 +291,7 @@ dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Rele
 ```
 
 The solution now includes real unit tests for the domain, API foundation, and application contract models, a short coverage command, global error handling, controller-based Swagger discovery, and the first infrastructure/migration setup.
+
+## Next step
+
+The next logical step is `Stage 5 - Security`: password hashing, JWT token generation, current-user extraction, and API authentication wiring.

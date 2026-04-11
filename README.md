@@ -105,6 +105,7 @@ These commands work without extra parameters because the root folder contains [S
 ```powershell
 dotnet restore
 dotnet build
+dotnet test
 dotnet test -c Release
 dotnet tool restore
 ```

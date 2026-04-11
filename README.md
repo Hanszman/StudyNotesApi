@@ -24,6 +24,9 @@ We have completed the bootstrap step, the first domain modeling step, the EF Cor
 - paging, sorting, and entity filter models are now ready for the service/repository implementations
 - the infrastructure repository layer is now implemented against EF Core
 - repository queries now support user scoping, filters, paging, and validated sorting
+- JWT authentication is now configured in the API pipeline
+- password hashing now uses `Argon2id`
+- the Swagger UI is now prepared for Bearer token authentication
 
 ## Structure
 
@@ -206,6 +209,8 @@ When the API is running, open:
 http://localhost:5080/swagger
 ```
 
+Swagger is now configured with a Bearer security scheme. Once authentication endpoints exist, you will be able to paste a JWT token into Swagger UI and call protected endpoints directly.
+
 ## Health endpoint
 
 When the API is running, you can probe:
@@ -291,8 +296,8 @@ dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Rele
 .\coverage.cmd
 ```
 
-The solution now includes real unit tests for the domain, API foundation, and application contract models, a short coverage command, global error handling, controller-based Swagger discovery, and the first infrastructure/migration setup.
+The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, and security components, a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
 
 ## Next step
 
-The next logical step is `Stage 5 - Security`: password hashing, JWT token generation, current-user extraction, and API authentication wiring.
+The next logical step is `Stage 6 - Auth`: registration, login, duplicate-email validation, password verification, token issuance, and the first public authentication endpoints.

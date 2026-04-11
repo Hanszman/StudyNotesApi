@@ -68,6 +68,10 @@ foreach ($classNode in $coverageXml.coverage.packages.package.classes.class) {
         continue
     }
 
+    if (-not $fileName.StartsWith($rootPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+        continue
+    }
+
     $normalizedFileName = $fileName.Replace('\', '/')
     $isExcluded = $false
 

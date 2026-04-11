@@ -4,7 +4,7 @@ REST API for study notes, built with ASP.NET Core, C#, EF Core, MySQL, Swagger, 
 
 ## Current status
 
-We have completed the bootstrap step and the first domain modeling step of the blueprint:
+We have completed the bootstrap step, the first domain modeling step, the EF Core/MySQL persistence setup, and the first cross-cutting API foundation items of the blueprint:
 
 - the solution has been reorganized into `src/` and `tests/`
 - the default `WeatherForecast` template code has been removed
@@ -17,6 +17,9 @@ We have completed the bootstrap step and the first domain modeling step of the b
 - the unit test project now contains the first real tests for entity behavior
 - EF Core infrastructure and entity mappings are now in place
 - the initial EF Core migration has been generated and applied locally
+- global exception handling is now centralized in middleware
+- the project already follows controller-based routing and Swagger discovery
+- test coverage validation is now available from a short root command
 
 ## Structure
 
@@ -65,6 +68,18 @@ In short:
 - `appsettings.json` keeps safe fallback defaults and non-secret configuration
 - `EnvironmentFileLoader` is the bridge that makes `.env` participate in the normal .NET configuration system
 
+## Engineering rules
+
+This repository should evolve with:
+
+- clean code as the default baseline
+- `SRP` applied across controllers, services, repositories, and infrastructure helpers
+- `DRY` without forcing premature abstractions
+- thin controllers and business rules outside the HTTP layer
+- Swagger, unit tests, coverage validation, and README updates delivered together with each increment
+
+Cross-cutting items such as Swagger, error handling, tests, and coverage are not “final stage only” tasks here. They must keep evolving as new controllers, services, and domain behaviors are added.
+
 ### Local database
 
 Expected local development database:
@@ -87,6 +102,7 @@ These commands work without extra parameters because the root folder contains [S
 dotnet restore
 dotnet build
 dotnet test
+dotnet tool restore
 ```
 
 Use the explicit form when you want to target something specific:
@@ -107,10 +123,10 @@ Recommended standard workflow:
 ```powershell
 cd src/StudyNotesApi.Api
 dotnet run
-dotnet watch
+dotnet watch run
 ```
 
-`dotnet watch run` is also valid there if you prefer to be explicit.
+`dotnet watch` may work too, but `dotnet watch run` is the clearest version for a web API project and is the one documented in this repository.
 
 If you want to stay in the repository root, then you must target the API project explicitly:
 
@@ -123,22 +139,36 @@ That is standard .NET CLI behavior and does not require any custom script.
 
 ### EF Core migrations
 
-Restore local .NET tools first if needed:
+Recommended standard workflow:
 
 ```powershell
 dotnet tool restore
+cd src/StudyNotesApi.Api
 ```
 
 Create a new migration:
 
 ```powershell
-dotnet dotnet-ef migrations add MigrationName --project src/StudyNotesApi.Infrastructure/StudyNotesApi.Infrastructure.csproj --startup-project src/StudyNotesApi.Api/StudyNotesApi.Api.csproj --output-dir Data/Migrations
+dotnet dotnet-ef migrations add MigrationName --project ..\StudyNotesApi.Infrastructure --output-dir Data\Migrations
 ```
 
 Apply migrations to the local database:
 
 ```powershell
-dotnet dotnet-ef database update --project src/StudyNotesApi.Infrastructure/StudyNotesApi.Infrastructure.csproj --startup-project src/StudyNotesApi.Api/StudyNotesApi.Api.csproj
+dotnet dotnet-ef database update --project ..\StudyNotesApi.Infrastructure
+```
+
+Remove the latest migration:
+
+```powershell
+dotnet dotnet-ef migrations remove --project ..\StudyNotesApi.Infrastructure
+```
+
+If you prefer to stay in the repository root, the explicit form is still valid:
+
+```powershell
+dotnet dotnet-ef migrations add MigrationName --project src/StudyNotesApi.Infrastructure --startup-project src/StudyNotesApi.Api --output-dir Data\Migrations
+dotnet dotnet-ef database update --project src/StudyNotesApi.Infrastructure --startup-project src/StudyNotesApi.Api
 ```
 
 The repository already includes the first migration in [src/StudyNotesApi.Infrastructure/Data/Migrations/20260411142404_InitialCreate.cs](c:/VictorLocal/Projects/Personal/StudyNotesApi/src/StudyNotesApi.Infrastructure/Data/Migrations/20260411142404_InitialCreate.cs).
@@ -187,19 +217,62 @@ Swagger should now show both endpoints because they are controller-based routes.
 
 ## Test coverage
 
-You can run the coverage script from the repository root with:
+You can run coverage validation from the repository root with:
+
+```powershell
+.\coverage.cmd
+```
+
+This wrapper:
+
+- restores local .NET tools automatically
+- runs the unit test suite
+- fails if the tests fail
+- collects coverage with `dotnet-coverage`
+- generates a Cobertura coverage report
+- generates an HTML report in `TestResults/CoverageReport`
+- prints overall line coverage for application files
+- prints file-by-file coverage percentages for application files
+- fails if any included file is below `100%`
+
+Coverage validation intentionally excludes files that do not add value to test directly, such as:
+
+- `Program.cs`
+- DTO-only files
+- migration files
+- pure configuration and startup wiring files
+- test files
+
+If you want the explicit script form, this also works from the repository root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\test-coverage.ps1
 ```
 
-The script:
+## Routing model
 
-- runs the unit test suite
-- fails if the tests fail
-- generates a Cobertura coverage report
-- prints overall line coverage
-- prints file-by-file coverage percentages
+[Program.cs](c:/VictorLocal/Projects/Personal/StudyNotesApi/src/StudyNotesApi.Api/Program.cs) now stays intentionally small and delegates startup concerns to extension methods.
+
+- `AddApiServices(...)` registers services, infrastructure, Swagger, health checks, and controllers
+- `UseApiPipeline()` configures the middleware pipeline
+- `MapApiEndpoints()` maps the root redirect and enables controller discovery through `app.MapControllers()`
+
+New controller routes do not need to be manually listed one by one in `Program.cs`. Once a controller is registered and uses route attributes such as `[Route("api/[controller]")]`, ASP.NET Core discovers it automatically when `app.MapControllers()` runs.
+
+## Error handling
+
+Global error handling is centralized in [ExceptionHandlingMiddleware.cs](c:/VictorLocal/Projects/Personal/StudyNotesApi/src/StudyNotesApi.Api/Middlewares/ExceptionHandlingMiddleware.cs).
+
+The middleware sits in the request pipeline before the controllers execute. If any controller, service, or dependency throws an exception that bubbles up, the middleware intercepts it and converts it into a standardized JSON error response with the correct HTTP status code.
+
+Current mappings include:
+
+- `ValidationException` -> `400`
+- `UnauthorizedException` -> `401`
+- `ForbiddenException` -> `403`
+- `NotFoundException` -> `404`
+- `ConflictException` -> `409`
+- any other unhandled exception -> `500`
 
 ## Validation status
 
@@ -208,11 +281,7 @@ The current increment was validated with:
 ```powershell
 dotnet build StudyNotesApi.sln
 dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj
-powershell -ExecutionPolicy Bypass -File .\scripts\test-coverage.ps1
+.\coverage.cmd
 ```
 
-The solution now includes real unit tests for the domain entity behaviors and a coverage script for per-file reporting.
-
-## Next step
-
-The next logical step is to move into the application contracts and repository layer: interfaces, paging/filtering models, repository contracts, and the first service abstractions.
+The solution now includes real unit tests for the domain and API foundation behavior, a short coverage command, global error handling, controller-based Swagger discovery, and the first infrastructure/migration setup.

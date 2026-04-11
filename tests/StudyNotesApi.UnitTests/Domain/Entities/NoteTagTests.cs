@@ -32,4 +32,21 @@ public class NoteTagTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Private_constructor_should_exist_for_ef_core()
+    {
+        var noteTag = Activator.CreateInstance(typeof(NoteTag), nonPublic: true);
+
+        noteTag.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Navigation_properties_should_start_as_null()
+    {
+        var noteTag = new NoteTag(Guid.NewGuid(), Guid.NewGuid());
+
+        noteTag.Note.Should().BeNull();
+        noteTag.Tag.Should().BeNull();
+    }
 }

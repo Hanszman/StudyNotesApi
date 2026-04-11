@@ -782,6 +782,10 @@ Regra operacional deste repositório:
 - cada incremento funcional deve atualizar código, testes e README no mesmo lote
 - não deixar testes unitários ou documentação para o final da entrega
 - quando uma entidade entrar no projeto, seus comandos e observações de uso também devem entrar no README
+- aplicar clean code, DRY e SRP desde o início, sem esperar uma etapa futura de "refactor geral"
+- manter `Program.cs` enxuto, empurrando registro de serviços, pipeline HTTP e outros detalhes para extensions específicas
+- evoluir Swagger, tratamento global de erros, testes e coverage junto com cada etapa funcional, sempre no mesmo lote
+- considerar as etapas 10, 11, 12 e 13 como responsabilidades contínuas do projeto, não como um bloco isolado no final
 
 # Etapa 0 — Bootstrap da solution
 
@@ -1032,6 +1036,9 @@ Implementar CRUD completo de notas com categoria e tags.
 ## Objetivo
 Deixar a documentação útil de verdade.
 
+Observação importante:
+- apesar de existir como etapa dedicada, Swagger deve ser atualizado continuamente conforme novos endpoints entrarem no projeto
+
 ## Tarefas
 1. Configurar título e versão da API
 2. Configurar esquema Bearer no Swagger
@@ -1047,6 +1054,9 @@ Deixar a documentação útil de verdade.
 
 ## Objetivo
 Evitar controller entulhado de try/catch.
+
+Observação importante:
+- o middleware e o padrão de resposta de erro devem nascer cedo e acompanhar todas as etapas seguintes
 
 ## Tarefas
 1. Criar middleware global de exceptions
@@ -1068,6 +1078,9 @@ Evitar controller entulhado de try/catch.
 
 ## Objetivo
 Cobrir services e classes utilitárias.
+
+Observação importante:
+- os testes não devem ser adiados para o final; cada nova entidade, service, controller ou helper relevante deve entrar já com testes no mesmo incremento
 
 ## Escopo mínimo
 ### AuthService
@@ -1118,6 +1131,9 @@ Cobrir services e classes utilitárias.
 ## Objetivo
 Garantir cobertura total do que faz sentido cobrir.
 
+Observação importante:
+- coverage deve ser acompanhado continuamente a cada etapa, com validação por arquivo no escopo aplicável
+
 ## Meta
 - **100% coverage** em services, validators e security helpers
 - excluir de cobertura arquivos que não agregam valor testar diretamente, como:
@@ -1144,6 +1160,12 @@ Garantir cobertura total do que faz sentido cobrir.
 - não expor entidade diretamente no controller
 - async em tudo que tocar banco
 - cancellation token onde fizer sentido
+- seguir clean code como baseline
+- aplicar SRP em classes, serviços, repositórios, middlewares e extensions
+- aplicar DRY sem criar abstrações artificiais cedo demais
+- manter startup e pipeline HTTP organizados por responsabilidade
+- documentar endpoints no Swagger no mesmo incremento em que forem criados
+- criar testes e validar coverage no mesmo incremento em que a lógica entrar
 
 ### Convenções de naming
 - classes no singular: `Note`, `Tag`, `Category`
@@ -1157,6 +1179,12 @@ Garantir cobertura total do que faz sentido cobrir.
 
 Como .NET normalmente usa `dotnet` CLI em vez de scripts estilo npm, o mais correto aqui é documentar **comandos operacionais** no README. Se você quiser muito, pode criar um `Makefile` depois, mas não é obrigatório.
 
+Regra prática para este repositório:
+- `restore`, `build` e `test` podem rodar da raiz
+- `run` e `watch` devem rodar dentro de `src/StudyNotesApi.Api`
+- comandos de migration ficam mais curtos se rodarem dentro de `src/StudyNotesApi.Api`
+- coverage pode ser exposto por um comando curto na raiz, como `coverage.cmd`, desde que internamente continue usando ferramentas padrão do ecossistema .NET
+
 ### 23.1 Restaurar pacotes
 ```bash
 dotnet restore
@@ -1169,34 +1197,36 @@ dotnet build StudyNotesApi.sln
 
 ### 23.3 Rodar API
 ```bash
-dotnet run --project src/StudyNotesApi.Api
+cd src/StudyNotesApi.Api
+dotnet run
 ```
 
 ### 23.4 Rodar em watch mode
 ```bash
-dotnet watch --project src/StudyNotesApi.Api run
+cd src/StudyNotesApi.Api
+dotnet watch run
 ```
 
 ### 23.5 Criar migration
 ```bash
-dotnet ef migrations add InitialCreate \
-  --project src/StudyNotesApi.Infrastructure \
-  --startup-project src/StudyNotesApi.Api \
+cd src/StudyNotesApi.Api
+dotnet dotnet-ef migrations add InitialCreate \
+  --project ../StudyNotesApi.Infrastructure \
   --output-dir Data/Migrations
 ```
 
 ### 23.6 Aplicar migration
 ```bash
-dotnet ef database update \
-  --project src/StudyNotesApi.Infrastructure \
-  --startup-project src/StudyNotesApi.Api
+cd src/StudyNotesApi.Api
+dotnet dotnet-ef database update \
+  --project ../StudyNotesApi.Infrastructure
 ```
 
 ### 23.7 Remover última migration
 ```bash
-dotnet ef migrations remove \
-  --project src/StudyNotesApi.Infrastructure \
-  --startup-project src/StudyNotesApi.Api
+cd src/StudyNotesApi.Api
+dotnet dotnet-ef migrations remove \
+  --project ../StudyNotesApi.Infrastructure
 ```
 
 ### 23.8 Rodar testes
@@ -1206,22 +1236,24 @@ dotnet test StudyNotesApi.sln
 
 ### 23.9 Rodar testes com coverage
 ```bash
-dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj \
-  /p:CollectCoverage=true \
-  /p:CoverletOutput=./TestResults/Coverage/ \
-  /p:CoverletOutputFormat=json,cobertura \
-  /p:ExcludeByFile="**/Program.cs;**/*Configuration.cs;**/Migrations/*;**/*Dto.cs"
+coverage.cmd
 ```
 
 ### 23.10 Gerar relatório HTML de coverage
-Instale a ferramenta:
+O comando curto de coverage pode internamente:
+- restaurar tools locais com `dotnet tool restore`
+- rodar `dotnet dotnet-coverage collect dotnet test ...`
+- gerar relatório HTML com `reportgenerator`
+- falhar se algum arquivo incluído estiver abaixo de 100%
+
+Se quiser rodar manualmente, instale/restaure a ferramenta:
 ```bash
-dotnet tool install -g dotnet-reportgenerator-globaltool
+dotnet tool restore
 ```
 
 Depois gere o relatório:
 ```bash
-reportgenerator \
+dotnet tool run reportgenerator \
   -reports:"tests/StudyNotesApi.UnitTests/TestResults/Coverage/coverage.cobertura.xml" \
   -targetdir:"tests/StudyNotesApi.UnitTests/TestResults/CoverageReport" \
   -reporttypes:Html

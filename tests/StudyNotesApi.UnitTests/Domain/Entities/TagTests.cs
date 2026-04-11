@@ -39,4 +39,31 @@ public class TagTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Rename_should_throw_when_name_is_invalid()
+    {
+        var tag = new Tag("dotnet", Guid.NewGuid());
+
+        var action = () => tag.Rename(" ");
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Private_constructor_should_exist_for_ef_core()
+    {
+        var tag = Activator.CreateInstance(typeof(Tag), nonPublic: true);
+
+        tag.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Navigation_properties_should_start_empty_or_null()
+    {
+        var tag = new Tag("dotnet", Guid.NewGuid());
+
+        tag.User.Should().BeNull();
+        tag.NoteTags.Should().BeEmpty();
+    }
 }

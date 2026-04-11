@@ -5,9 +5,11 @@ param(
 $ErrorActionPreference = "Stop"
 
 $rootPath = Split-Path -Parent $PSScriptRoot
+$dotnetCliHome = Join-Path $rootPath ".dotnet"
 $testProjectPath = Join-Path $rootPath "tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj"
 $resolvedResultsDirectory = Join-Path $rootPath $ResultsDirectory
 $coverageReportDirectory = Join-Path $rootPath "TestResults/CoverageReport"
+$coverageReportPath = Join-Path $resolvedResultsDirectory "coverage.cobertura.xml"
 $excludedPatterns = @(
     "*/Program.cs",
     "*/AssemblyReference.cs",
@@ -18,8 +20,15 @@ $excludedPatterns = @(
     "*/ApplicationDbContext.cs",
     "*/ApplicationDbContextFactory.cs",
     "*/ServiceCollectionExtensions.cs",
-    "*/WebApplicationExtensions.cs"
+    "*/WebApplicationExtensions.cs",
+    "*/tests/*"
 )
+
+if (-not (Test-Path $dotnetCliHome)) {
+    New-Item -ItemType Directory -Path $dotnetCliHome | Out-Null
+}
+
+$env:DOTNET_CLI_HOME = $dotnetCliHome
 
 if (Test-Path $resolvedResultsDirectory) {
     Remove-Item -Recurse -Force $resolvedResultsDirectory
@@ -29,18 +38,21 @@ if (Test-Path $coverageReportDirectory) {
     Remove-Item -Recurse -Force $coverageReportDirectory
 }
 
-Write-Host "Running unit tests with coverage..." -ForegroundColor Cyan
-& dotnet test $testProjectPath --collect:"XPlat Code Coverage" --results-directory $resolvedResultsDirectory
+Write-Host "Restoring local .NET tools..." -ForegroundColor Cyan
+& dotnet tool restore
 
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-$coverageReportPath = Get-ChildItem -Path $resolvedResultsDirectory -Recurse -Filter "coverage.cobertura.xml" |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1 -ExpandProperty FullName
+Write-Host "Running unit tests with coverage..." -ForegroundColor Cyan
+& dotnet dotnet-coverage collect dotnet test $testProjectPath --no-restore --output $coverageReportPath --output-format cobertura
 
-if (-not $coverageReportPath) {
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
+if (-not (Test-Path $coverageReportPath)) {
     throw "Coverage report was not generated."
 }
 
@@ -71,8 +83,14 @@ foreach ($classNode in $coverageXml.coverage.packages.package.classes.class) {
     }
 
     if (-not $fileCoverage.ContainsKey($fileName)) {
+        $displayFile = if ($fileName.StartsWith($rootPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $fileName.Substring($rootPath.Length).TrimStart('\', '/')
+        } else {
+            $fileName
+        }
+
         $fileCoverage[$fileName] = [PSCustomObject]@{
-            File = $fileName
+            File = $displayFile
             CoveredLines = 0
             TotalLines = 0
         }

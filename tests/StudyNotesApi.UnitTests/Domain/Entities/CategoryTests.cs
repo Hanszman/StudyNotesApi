@@ -54,4 +54,31 @@ public class CategoryTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Rename_should_throw_when_name_is_invalid()
+    {
+        var category = new Category("Backend", Guid.NewGuid());
+
+        var action = () => category.Rename(" ");
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Private_constructor_should_exist_for_ef_core()
+    {
+        var category = Activator.CreateInstance(typeof(Category), nonPublic: true);
+
+        category.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Navigation_properties_should_start_empty_or_null()
+    {
+        var category = new Category("Backend", Guid.NewGuid(), "#FFFFFF");
+
+        category.User.Should().BeNull();
+        category.Notes.Should().BeEmpty();
+    }
 }

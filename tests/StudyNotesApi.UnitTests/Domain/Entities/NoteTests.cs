@@ -82,4 +82,32 @@ public class NoteTests
 
         note.CategoryId.Should().BeNull();
     }
+
+    [Fact]
+    public void UpdateTitle_should_throw_when_title_is_invalid()
+    {
+        var note = new Note("Title", "Content", Guid.NewGuid());
+
+        var action = () => note.UpdateTitle(" ");
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Private_constructor_should_exist_for_ef_core()
+    {
+        var note = Activator.CreateInstance(typeof(Note), nonPublic: true);
+
+        note.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Navigation_properties_should_start_empty_or_null()
+    {
+        var note = new Note("Title", "Content", Guid.NewGuid());
+
+        note.User.Should().BeNull();
+        note.Category.Should().BeNull();
+        note.NoteTags.Should().BeEmpty();
+    }
 }

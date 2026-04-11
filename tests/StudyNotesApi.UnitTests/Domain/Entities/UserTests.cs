@@ -49,4 +49,42 @@ public class UserTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void UpdateEmail_should_throw_when_email_is_invalid()
+    {
+        var user = new User("Victor", "victor@email.com", "hash-value");
+
+        var action = () => user.UpdateEmail(" ");
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void UpdatePasswordHash_should_throw_when_hash_is_invalid()
+    {
+        var user = new User("Victor", "victor@email.com", "hash-value");
+
+        var action = () => user.UpdatePasswordHash(" ");
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Private_constructor_should_exist_for_ef_core()
+    {
+        var user = Activator.CreateInstance(typeof(User), nonPublic: true);
+
+        user.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Navigation_properties_should_expose_empty_read_only_collections_by_default()
+    {
+        var user = new User("Victor", "victor@email.com", "hash-value");
+
+        user.Categories.Should().BeEmpty();
+        user.Notes.Should().BeEmpty();
+        user.Tags.Should().BeEmpty();
+    }
 }

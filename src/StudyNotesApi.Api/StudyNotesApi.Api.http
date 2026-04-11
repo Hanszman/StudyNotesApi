@@ -5,6 +5,12 @@ Accept: application/json
 
 ###
 
+GET {{StudyNotesApi_HostAddress}}/api
+Accept: application/json
+
+###
+
 GET {{StudyNotesApi_HostAddress}}/api/health
+Accept: application/json
 
 ###

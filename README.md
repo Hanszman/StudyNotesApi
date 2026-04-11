@@ -8,12 +8,15 @@ We have completed the bootstrap step and the first domain modeling step of the b
 
 - the solution has been reorganized into `src/` and `tests/`
 - the default `WeatherForecast` template code has been removed
-- Swagger is configured at a basic level
-- a standard API health endpoint is available at `/api/health`
+- Swagger now documents the first HTTP endpoints
+- the API root endpoint is available at `/api`
+- the health endpoint is available at `/api/health` with JSON details
 - the root `.env` file is loaded automatically during startup
 - local MySQL points to `study-notes-db` in XAMPP
 - the core domain entities have been modeled in English
 - the unit test project now contains the first real tests for entity behavior
+- EF Core infrastructure and entity mappings are now in place
+- the initial EF Core migration has been generated and applied locally
 
 ## Structure
 
@@ -89,6 +92,7 @@ dotnet test
 Use the explicit form when you want to target something specific:
 
 ```powershell
+dotnet tool restore
 dotnet restore StudyNotesApi.sln
 dotnet build StudyNotesApi.sln
 dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj
@@ -117,6 +121,46 @@ dotnet watch --project src/StudyNotesApi.Api/StudyNotesApi.Api.csproj run
 
 That is standard .NET CLI behavior and does not require any custom script.
 
+### EF Core migrations
+
+Restore local .NET tools first if needed:
+
+```powershell
+dotnet tool restore
+```
+
+Create a new migration:
+
+```powershell
+dotnet dotnet-ef migrations add MigrationName --project src/StudyNotesApi.Infrastructure/StudyNotesApi.Infrastructure.csproj --startup-project src/StudyNotesApi.Api/StudyNotesApi.Api.csproj --output-dir Data/Migrations
+```
+
+Apply migrations to the local database:
+
+```powershell
+dotnet dotnet-ef database update --project src/StudyNotesApi.Infrastructure/StudyNotesApi.Infrastructure.csproj --startup-project src/StudyNotesApi.Api/StudyNotesApi.Api.csproj
+```
+
+The repository already includes the first migration in [src/StudyNotesApi.Infrastructure/Data/Migrations/20260411142404_InitialCreate.cs](c:/VictorLocal/Projects/Personal/StudyNotesApi/src/StudyNotesApi.Infrastructure/Data/Migrations/20260411142404_InitialCreate.cs).
+
+## API endpoints available right now
+
+### `GET /api`
+
+Returns basic API metadata such as name, version, environment, and quick links.
+
+### `GET /api/health`
+
+Returns a JSON health report with:
+
+- overall API health status
+- current environment
+- API version
+- UTC timestamp
+- individual checks for:
+  - API online status
+  - database connectivity
+
 ## Swagger
 
 When the API is running, open:
@@ -133,7 +177,29 @@ When the API is running, you can probe:
 http://localhost:5080/api/health
 ```
 
-It currently returns a basic healthy response and is useful for quick smoke checks, scripts, and future container/orchestration readiness checks.
+The root API metadata endpoint is also available at:
+
+```text
+http://localhost:5080/api
+```
+
+Swagger should now show both endpoints because they are controller-based routes.
+
+## Test coverage
+
+You can run the coverage script from the repository root with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\test-coverage.ps1
+```
+
+The script:
+
+- runs the unit test suite
+- fails if the tests fail
+- generates a Cobertura coverage report
+- prints overall line coverage
+- prints file-by-file coverage percentages
 
 ## Validation status
 
@@ -142,10 +208,11 @@ The current increment was validated with:
 ```powershell
 dotnet build StudyNotesApi.sln
 dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj
+powershell -ExecutionPolicy Bypass -File .\scripts\test-coverage.ps1
 ```
 
-The solution now includes real unit tests for the first domain entity behaviors.
+The solution now includes real unit tests for the domain entity behaviors and a coverage script for per-file reporting.
 
 ## Next step
 
-The next logical step is `Stage 2 - Infrastructure/Data`: add the EF Core `DbContext`, entity mappings, MySQL configuration, and the first migration for the modeled domain entities.
+The next logical step is to move into the application contracts and repository layer: interfaces, paging/filtering models, repository contracts, and the first service abstractions.

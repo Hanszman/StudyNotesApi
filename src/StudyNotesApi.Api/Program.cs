@@ -1,11 +1,17 @@
 using StudyNotesApi.Api.Configurations;
+using StudyNotesApi.Api.HealthChecks;
+using StudyNotesApi.Infrastructure.DependencyInjection;
 
 EnvironmentFileLoader.LoadFromSolutionRoot();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
-builder.Services.AddHealthChecks();
+builder.Services
+    .AddHealthChecks()
+    .AddCheck("api", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("API is online."))
+    .AddCheck<DatabaseHealthCheck>("database");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -23,8 +29,6 @@ app.UseAuthorization();
 
 app.MapGet("/", () => Results.Redirect("/swagger"))
     .ExcludeFromDescription();
-
-app.MapHealthChecks("/api/health");
 app.MapControllers();
 
 app.Run();

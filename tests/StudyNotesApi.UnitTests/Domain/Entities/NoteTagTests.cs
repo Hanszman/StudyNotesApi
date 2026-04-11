@@ -24,4 +24,12 @@ public class NoteTagTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Constructor_should_throw_when_tag_id_is_empty()
+    {
+        var action = () => new NoteTag(Guid.NewGuid(), Guid.Empty);
+
+        action.Should().Throw<ArgumentException>();
+    }
 }

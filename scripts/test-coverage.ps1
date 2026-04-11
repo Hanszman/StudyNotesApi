@@ -7,9 +7,26 @@ $ErrorActionPreference = "Stop"
 $rootPath = Split-Path -Parent $PSScriptRoot
 $testProjectPath = Join-Path $rootPath "tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj"
 $resolvedResultsDirectory = Join-Path $rootPath $ResultsDirectory
+$coverageReportDirectory = Join-Path $rootPath "TestResults/CoverageReport"
+$excludedPatterns = @(
+    "*/Program.cs",
+    "*/AssemblyReference.cs",
+    "*/DTOs/*",
+    "*/*Configuration.cs",
+    "*/Data/Migrations/*",
+    "*/EnvironmentFileLoader.cs",
+    "*/ApplicationDbContext.cs",
+    "*/ApplicationDbContextFactory.cs",
+    "*/ServiceCollectionExtensions.cs",
+    "*/WebApplicationExtensions.cs"
+)
 
 if (Test-Path $resolvedResultsDirectory) {
     Remove-Item -Recurse -Force $resolvedResultsDirectory
+}
+
+if (Test-Path $coverageReportDirectory) {
+    Remove-Item -Recurse -Force $coverageReportDirectory
 }
 
 Write-Host "Running unit tests with coverage..." -ForegroundColor Cyan
@@ -27,6 +44,8 @@ if (-not $coverageReportPath) {
     throw "Coverage report was not generated."
 }
 
+& dotnet tool run reportgenerator "-reports:$coverageReportPath" "-targetdir:$coverageReportDirectory" "-reporttypes:Html;TextSummary"
+
 [xml]$coverageXml = Get-Content -Path $coverageReportPath
 $fileCoverage = @{}
 
@@ -34,6 +53,20 @@ foreach ($classNode in $coverageXml.coverage.packages.package.classes.class) {
     $fileName = $classNode.filename
 
     if ([string]::IsNullOrWhiteSpace($fileName)) {
+        continue
+    }
+
+    $normalizedFileName = $fileName.Replace('\', '/')
+    $isExcluded = $false
+
+    foreach ($pattern in $excludedPatterns) {
+        if ($normalizedFileName -like $pattern) {
+            $isExcluded = $true
+            break
+        }
+    }
+
+    if ($isExcluded) {
         continue
     }
 
@@ -75,12 +108,28 @@ $summary = $fileCoverage.Values |
             Expression = { $_.TotalLines }
         }
 
-$overallCoverage = [double]$coverageXml.coverage.'line-rate'
+$includedFiles = $fileCoverage.Values | Where-Object { $_.TotalLines -gt 0 }
+$coveredLines = ($includedFiles | Measure-Object -Property CoveredLines -Sum).Sum
+$totalLines = ($includedFiles | Measure-Object -Property TotalLines -Sum).Sum
+$overallCoverage = if ($totalLines -eq 0) { 1 } else { $coveredLines / $totalLines }
+$filesBelowThreshold = $includedFiles | Where-Object { $_.CoveredLines -lt $_.TotalLines }
 
 Write-Host ""
 Write-Host "Coverage summary by file" -ForegroundColor Green
 $summary | Format-Table -AutoSize
 
 Write-Host ""
-Write-Host ("Overall line coverage: {0:P2}" -f $overallCoverage) -ForegroundColor Green
-Write-Host "Coverage report file: $coverageReportPath" -ForegroundColor DarkGray
+Write-Host ("Overall included-file line coverage: {0:P2}" -f $overallCoverage) -ForegroundColor Green
+Write-Host "HTML report: TestResults/CoverageReport/index.html" -ForegroundColor DarkGray
+Write-Host "Raw report file: $coverageReportPath" -ForegroundColor DarkGray
+
+if ($filesBelowThreshold.Count -gt 0) {
+    Write-Host ""
+    Write-Host "Files below 100% coverage:" -ForegroundColor Red
+    $filesBelowThreshold |
+        Sort-Object File |
+        Select-Object File, CoveredLines, TotalLines |
+        Format-Table -AutoSize
+
+    throw "Coverage validation failed because one or more included files are below 100%."
+}

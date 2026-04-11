@@ -35,4 +35,23 @@ public class CategoryTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Rename_should_update_the_name_and_timestamp()
+    {
+        var category = new Category("Backend", Guid.NewGuid(), null);
+
+        category.Rename("  Architecture  ");
+
+        category.Name.Should().Be("Architecture");
+        category.UpdatedAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Constructor_should_throw_when_name_is_invalid()
+    {
+        var action = () => new Category(" ", Guid.NewGuid());
+
+        action.Should().Throw<ArgumentException>();
+    }
 }

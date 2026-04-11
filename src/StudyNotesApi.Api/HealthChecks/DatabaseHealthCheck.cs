@@ -1,21 +1,19 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using StudyNotesApi.Infrastructure.Data.Context;
 
 namespace StudyNotesApi.Api.HealthChecks;
 
 public class DatabaseHealthCheck : IHealthCheck
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IDatabaseConnectionChecker _databaseConnectionChecker;
 
-    public DatabaseHealthCheck(ApplicationDbContext dbContext)
+    public DatabaseHealthCheck(IDatabaseConnectionChecker databaseConnectionChecker)
     {
-        _dbContext = dbContext;
+        _databaseConnectionChecker = databaseConnectionChecker;
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        var canConnect = await _dbContext.Database.CanConnectAsync(cancellationToken);
+        var canConnect = await _databaseConnectionChecker.CanConnectAsync(cancellationToken);
 
         return canConnect
             ? HealthCheckResult.Healthy("Database connection is available.")

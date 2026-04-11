@@ -39,4 +39,14 @@ public class UserTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void UpdateName_should_throw_when_name_is_invalid()
+    {
+        var user = new User("Victor", "victor@email.com", "hash-value");
+
+        var action = () => user.UpdateName(" ");
+
+        action.Should().Throw<ArgumentException>();
+    }
 }

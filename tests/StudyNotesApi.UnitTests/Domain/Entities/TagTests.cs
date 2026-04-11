@@ -31,4 +31,12 @@ public class TagTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Constructor_should_throw_when_user_id_is_empty()
+    {
+        var action = () => new Tag("dotnet", Guid.Empty);
+
+        action.Should().Throw<ArgumentException>();
+    }
 }

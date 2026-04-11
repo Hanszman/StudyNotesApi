@@ -54,4 +54,32 @@ public class NoteTests
 
         action.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void Constructor_should_throw_when_user_id_is_empty()
+    {
+        var action = () => new Note("Title", "Content", Guid.Empty);
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void UpdateContent_should_convert_whitespace_to_empty_string()
+    {
+        var note = new Note("Title", "Content", Guid.NewGuid());
+
+        note.UpdateContent("   ");
+
+        note.Content.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void SetCategory_should_allow_null_category()
+    {
+        var note = new Note("Title", "Content", Guid.NewGuid(), Guid.NewGuid());
+
+        note.SetCategory(null);
+
+        note.CategoryId.Should().BeNull();
+    }
 }

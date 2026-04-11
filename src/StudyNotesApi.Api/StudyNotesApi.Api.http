@@ -4,3 +4,7 @@ GET {{StudyNotesApi_HostAddress}}/
 Accept: application/json
 
 ###
+
+GET {{StudyNotesApi_HostAddress}}/api/health
+
+###

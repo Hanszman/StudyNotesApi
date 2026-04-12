@@ -23,6 +23,7 @@ public static class WebApplicationExtensions
     public static WebApplication MapApiEndpoints(this WebApplication app)
     {
         app.MapGet("/", () => Results.Redirect("/swagger"))
+            .AllowAnonymous()
             .ExcludeFromDescription();
 
         app.MapControllers();

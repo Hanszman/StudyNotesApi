@@ -246,6 +246,12 @@ Swagger is now configured with a Bearer security scheme. You can paste a JWT tok
 
 Public endpoints are explicitly marked with `AllowAnonymous`. The authorization fallback policy now protects every other endpoint by default, which helps us keep future CRUD routes secure even if we forget an `[Authorize]` attribute on a controller.
 
+In the current Swagger setup, use the `Authorize` button and paste the full header value:
+
+```text
+Bearer <your-jwt-token>
+```
+
 ## Health endpoint
 
 When the API is running, you can probe:

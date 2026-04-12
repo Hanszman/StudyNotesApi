@@ -30,6 +30,25 @@ public static class ServiceCollectionExtensions
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var authorizationHeader = context.Request.Headers.Authorization.ToString();
+                        if (string.IsNullOrWhiteSpace(authorizationHeader))
+                        {
+                            return Task.CompletedTask;
+                        }
+
+                        const string bearerPrefix = "Bearer ";
+                        context.Token = authorizationHeader.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase)
+                            ? authorizationHeader[bearerPrefix.Length..].Trim()
+                            : authorizationHeader.Trim();
+
+                        return Task.CompletedTask;
+                    }
+                };
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -70,17 +89,15 @@ public static class ServiceCollectionExtensions
             var securityScheme = new OpenApiSecurityScheme
             {
                 Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = JwtBearerDefaults.AuthenticationScheme,
-                BearerFormat = "JWT",
+                Type = SecuritySchemeType.ApiKey,
                 In = ParameterLocation.Header,
-                Description = "Enter a valid Bearer token to access protected endpoints."
+                Description = "Enter the full Authorization header value, for example: Bearer eyJ..."
             };
 
             options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
-            options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+            options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
             {
-                [new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, null, null)] = []
+                [new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, document, null)] = []
             });
         });
 

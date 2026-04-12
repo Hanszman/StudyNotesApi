@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudyNotesApi.Api.DTOs.Common;
 
@@ -5,6 +6,7 @@ namespace StudyNotesApi.Api.Controllers;
 
 [ApiController]
 [Route("api")]
+[AllowAnonymous]
 public class ApiInfoController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;

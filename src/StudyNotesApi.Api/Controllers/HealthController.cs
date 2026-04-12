@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using StudyNotesApi.Api.DTOs.Common;
@@ -6,6 +7,7 @@ namespace StudyNotesApi.Api.Controllers;
 
 [ApiController]
 [Route("api/health")]
+[AllowAnonymous]
 public class HealthController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;

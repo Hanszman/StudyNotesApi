@@ -35,3 +35,22 @@ Content-Type: application/json
 }
 
 ###
+
+@AuthToken = replace-with-bearer-token
+
+GET {{StudyNotesApi_HostAddress}}/api/categories
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+###
+
+POST {{StudyNotesApi_HostAddress}}/api/categories
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+{
+  "name": "Backend",
+  "color": "#2563EB"
+}
+
+###

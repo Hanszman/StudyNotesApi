@@ -80,6 +80,12 @@ public class CategoryRepository : ICategoryRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateAsync(Category category, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Categories.Update(category);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private static IQueryable<Category> ApplySorting(IQueryable<Category> query, SortRequest sortRequest)
     {
         var sortBy = sortRequest.SortBy ?? "createdAt";

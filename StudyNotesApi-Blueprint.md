@@ -1381,3 +1381,7 @@ Depois do V1, você pode evoluir para:
 - testes com cobertura alta
 
 É pequeno o bastante pra terminar, mas robusto o suficiente pra te ensinar padrão de projeto real.
+
+## Nota de andamento
+
+- A Etapa 7 deve manter os endpoints protegidos por Bearer token, com isolamento por usuário.

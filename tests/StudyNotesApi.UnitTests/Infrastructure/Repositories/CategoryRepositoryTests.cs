@@ -24,6 +24,25 @@ public class CategoryRepositoryTests
     }
 
     [Fact]
+    public async Task UpdateAsync_should_persist_changes_to_a_category()
+    {
+        await using var dbContext = RepositoryTestContextFactory.Create();
+        var repository = new CategoryRepository(dbContext);
+        var category = new Category("Backend", Guid.NewGuid(), "#111111");
+        await repository.AddAsync(category);
+
+        category.Rename("Architecture");
+        category.UpdateColor("#222222");
+
+        await repository.UpdateAsync(category);
+
+        var updated = await repository.GetByIdAsync(category.Id, category.UserId);
+        updated.Should().NotBeNull();
+        updated!.Name.Should().Be("Architecture");
+        updated.Color.Should().Be("#222222");
+    }
+
+    [Fact]
     public async Task ExistsByNameAsync_should_support_user_scope_and_exclusion()
     {
         await using var dbContext = RepositoryTestContextFactory.Create();

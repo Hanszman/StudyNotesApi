@@ -28,6 +28,8 @@ We have completed the bootstrap step, the first domain modeling step, the EF Cor
 - password hashing now uses `Argon2id`
 - the Swagger UI is now prepared for Bearer token authentication
 - registration and login endpoints are now available
+- category CRUD is now available through authenticated endpoints
+- protected endpoints now require Bearer authentication by default unless explicitly marked as public
 
 ## Structure
 
@@ -210,6 +212,28 @@ Registers a new user and returns the created user payload.
 
 Authenticates a user and returns a JWT Bearer token.
 
+This endpoint does not require an incoming token. It does require a valid server-side `Jwt:Secret`, because the API needs that secret to generate the token returned in the response.
+
+### `GET /api/categories`
+
+Returns the authenticated user's categories with pagination, filtering, and sorting.
+
+### `GET /api/categories/{id}`
+
+Returns a single category owned by the authenticated user.
+
+### `POST /api/categories`
+
+Creates a category for the authenticated user.
+
+### `PUT /api/categories/{id}`
+
+Updates a category owned by the authenticated user.
+
+### `DELETE /api/categories/{id}`
+
+Deletes a category owned by the authenticated user.
+
 ## Swagger
 
 When the API is running, open:
@@ -218,7 +242,9 @@ When the API is running, open:
 http://localhost:5080/swagger
 ```
 
-Swagger is now configured with a Bearer security scheme. Once authentication endpoints exist, you will be able to paste a JWT token into Swagger UI and call protected endpoints directly.
+Swagger is now configured with a Bearer security scheme. You can paste a JWT token into Swagger UI and call protected endpoints directly.
+
+Public endpoints are explicitly marked with `AllowAnonymous`. The authorization fallback policy now protects every other endpoint by default, which helps us keep future CRUD routes secure even if we forget an `[Authorize]` attribute on a controller.
 
 ## Health endpoint
 
@@ -305,8 +331,8 @@ dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Rele
 .\coverage.cmd
 ```
 
-The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, security components, and auth flow, plus a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
+The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, security components, auth flow, and the first authenticated category CRUD slice, plus a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
 
 ## Next step
 
-The next logical step is `Stage 7 - Categories CRUD`: category DTOs, service implementation, controller endpoints, paging/filtering/sorting, and authenticated user scoping.
+The next logical step is `Stage 8 - Tags CRUD`: tag DTOs, service implementation, controller endpoints, paging/filtering/sorting, and authenticated user scoping.

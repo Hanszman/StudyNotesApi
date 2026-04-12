@@ -40,6 +40,19 @@ public class NoteTests
     }
 
     [Fact]
+    public void ReplaceTags_should_replace_the_note_tags_with_distinct_values()
+    {
+        var tagA = Guid.NewGuid();
+        var tagB = Guid.NewGuid();
+        var note = new Note("Title", "Content", Guid.NewGuid());
+
+        note.ReplaceTags([tagA, tagB, tagA]);
+
+        note.NoteTags.Select(noteTag => noteTag.TagId).Should().BeEquivalentTo([tagA, tagB]);
+        note.UpdatedAt.Should().NotBeNull();
+    }
+
+    [Fact]
     public void SetCategory_should_treat_empty_guid_as_null()
     {
         var note = new Note("Title", "Content", Guid.NewGuid(), Guid.Empty);
@@ -91,6 +104,26 @@ public class NoteTests
         var action = () => note.UpdateTitle(" ");
 
         action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void ReplaceTags_should_throw_when_collection_contains_empty_guid()
+    {
+        var note = new Note("Title", "Content", Guid.NewGuid());
+
+        var action = () => note.ReplaceTags([Guid.Empty]);
+
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void ReplaceTags_should_throw_when_collection_is_null()
+    {
+        var note = new Note("Title", "Content", Guid.NewGuid());
+
+        var action = () => note.ReplaceTags(null!);
+
+        action.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]

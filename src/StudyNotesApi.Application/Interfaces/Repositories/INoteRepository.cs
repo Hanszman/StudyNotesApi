@@ -17,5 +17,7 @@ public interface INoteRepository
         SortRequest sortRequest,
         CancellationToken cancellationToken = default);
 
+    Task UpdateAsync(Note note, CancellationToken cancellationToken = default);
+
     Task RemoveAsync(Note note, CancellationToken cancellationToken = default);
 }

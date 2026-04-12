@@ -101,6 +101,34 @@ public class NoteRepository : INoteRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateAsync(Note note, CancellationToken cancellationToken = default)
+    {
+        var trackedNote = await _dbContext.Notes
+            .Include(current => current.NoteTags)
+            .FirstAsync(current => current.Id == note.Id && current.UserId == note.UserId, cancellationToken);
+
+        _dbContext.Entry(trackedNote).CurrentValues.SetValues(note);
+
+        var desiredTagIds = note.NoteTags.Select(noteTag => noteTag.TagId).ToHashSet();
+        var currentTagIds = trackedNote.NoteTags.Select(noteTag => noteTag.TagId).ToHashSet();
+
+        var noteTagsToRemove = trackedNote.NoteTags
+            .Where(noteTag => !desiredTagIds.Contains(noteTag.TagId))
+            .ToList();
+
+        foreach (var noteTag in noteTagsToRemove)
+        {
+            _dbContext.NoteTags.Remove(noteTag);
+        }
+
+        foreach (var tagId in desiredTagIds.Except(currentTagIds))
+        {
+            _dbContext.NoteTags.Add(new NoteTag(trackedNote.Id, tagId));
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private static IQueryable<Note> ApplySorting(IQueryable<Note> query, SortRequest sortRequest)
     {
         var sortBy = sortRequest.SortBy ?? "createdAt";

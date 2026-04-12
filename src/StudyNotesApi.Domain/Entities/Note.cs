@@ -75,6 +75,18 @@ public class Note : BaseEntity
         MarkAsUpdated();
     }
 
+    public void ReplaceTags(IReadOnlyCollection<Guid> tagIds)
+    {
+        _noteTags.Clear();
+
+        foreach (var tagId in NormalizeTagIds(tagIds))
+        {
+            _noteTags.Add(new NoteTag(Id, tagId));
+        }
+
+        MarkAsUpdated();
+    }
+
     private static Guid EnsureNotEmpty(Guid value, string paramName)
     {
         if (value == Guid.Empty)
@@ -103,5 +115,29 @@ public class Note : BaseEntity
     private static string NormalizeContent(string content)
     {
         return string.IsNullOrWhiteSpace(content) ? string.Empty : content.Trim();
+    }
+
+    private static IReadOnlyCollection<Guid> NormalizeTagIds(IReadOnlyCollection<Guid> tagIds)
+    {
+        if (tagIds is null)
+        {
+            throw new ArgumentNullException(nameof(tagIds));
+        }
+
+        var normalizedTagIds = new List<Guid>();
+        foreach (var tagId in tagIds)
+        {
+            if (tagId == Guid.Empty)
+            {
+                throw new ArgumentException("tagIds cannot contain empty values.", nameof(tagIds));
+            }
+
+            if (!normalizedTagIds.Contains(tagId))
+            {
+                normalizedTagIds.Add(tagId);
+            }
+        }
+
+        return normalizedTagIds;
     }
 }

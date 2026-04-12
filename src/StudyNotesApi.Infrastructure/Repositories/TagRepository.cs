@@ -87,6 +87,12 @@ public class TagRepository : ITagRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateAsync(Tag tag, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Tags.Update(tag);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private static IQueryable<Tag> ApplySorting(IQueryable<Tag> query, SortRequest sortRequest)
     {
         var sortBy = sortRequest.SortBy ?? "createdAt";

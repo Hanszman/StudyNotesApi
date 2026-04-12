@@ -24,6 +24,23 @@ public class TagRepositoryTests
     }
 
     [Fact]
+    public async Task UpdateAsync_should_persist_changes_to_a_tag()
+    {
+        await using var dbContext = RepositoryTestContextFactory.Create();
+        var repository = new TagRepository(dbContext);
+        var tag = new Tag("dotnet", Guid.NewGuid());
+        await repository.AddAsync(tag);
+
+        tag.Rename("csharp");
+
+        await repository.UpdateAsync(tag);
+
+        var updated = await repository.GetByIdAsync(tag.Id, tag.UserId);
+        updated.Should().NotBeNull();
+        updated!.Name.Should().Be("csharp");
+    }
+
+    [Fact]
     public async Task ExistsByNameAsync_should_support_user_scope_and_exclusion()
     {
         await using var dbContext = RepositoryTestContextFactory.Create();

@@ -1385,3 +1385,4 @@ Depois do V1, você pode evoluir para:
 ## Nota de andamento
 
 - A Etapa 7 deve manter os endpoints protegidos por Bearer token, com isolamento por usuário.
+- As Etapas 8 e 9 agora seguem o mesmo padrão: CRUDs de `Tags` e `Notes` protegidos por autenticação, com isolamento por usuário, paginação, filtros, ordenação, testes e coverage atualizados no mesmo incremento.

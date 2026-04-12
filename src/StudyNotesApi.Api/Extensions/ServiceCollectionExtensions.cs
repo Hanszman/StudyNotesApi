@@ -69,6 +69,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<INoteService, NoteService>();
+        services.AddScoped<ITagService, TagService>();
         services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

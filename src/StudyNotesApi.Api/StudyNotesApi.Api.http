@@ -54,3 +54,41 @@ Content-Type: application/json
 }
 
 ###
+
+GET {{StudyNotesApi_HostAddress}}/api/tags
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+###
+
+POST {{StudyNotesApi_HostAddress}}/api/tags
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+{
+  "name": "csharp"
+}
+
+###
+
+GET {{StudyNotesApi_HostAddress}}/api/notes?pageNumber=1&pageSize=10&sortBy=createdAt&sortDirection=desc
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+###
+
+POST {{StudyNotesApi_HostAddress}}/api/notes
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+{
+  "title": "Study JWT",
+  "content": "Review claims, expiration, and authorization flow.",
+  "categoryId": null,
+  "tagIds": [],
+  "isFavorite": true,
+  "isArchived": false,
+  "isPinned": true
+}
+
+###

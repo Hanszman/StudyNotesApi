@@ -24,6 +24,40 @@ public class NoteRepositoryTests
     }
 
     [Fact]
+    public async Task UpdateAsync_should_persist_scalar_changes_and_sync_note_tags()
+    {
+        await using var dbContext = RepositoryTestContextFactory.Create();
+        var repository = new NoteRepository(dbContext);
+        var userId = Guid.NewGuid();
+        var tagA = new Tag("dotnet", userId);
+        var tagB = new Tag("efcore", userId);
+        var note = new Note("Study EF", "content", userId);
+        note.ReplaceTags([tagA.Id]);
+
+        await dbContext.Tags.AddRangeAsync(tagA, tagB);
+        await repository.AddAsync(note);
+
+        dbContext.ChangeTracker.Clear();
+
+        var noteToUpdate = await repository.GetByIdAsync(note.Id, userId);
+        noteToUpdate.Should().NotBeNull();
+
+        noteToUpdate!.UpdateTitle("Updated title");
+        noteToUpdate.UpdateContent("updated content");
+        noteToUpdate.SetFavorite(true);
+        noteToUpdate.ReplaceTags([tagB.Id]);
+
+        await repository.UpdateAsync(noteToUpdate);
+
+        var updated = await repository.GetByIdAsync(note.Id, userId);
+        updated.Should().NotBeNull();
+        updated!.Title.Should().Be("Updated title");
+        updated.Content.Should().Be("updated content");
+        updated.IsFavorite.Should().BeTrue();
+        updated.NoteTags.Select(noteTag => noteTag.TagId).Should().BeEquivalentTo([tagB.Id]);
+    }
+
+    [Fact]
     public async Task GetByIdAsync_should_only_return_notes_from_the_requested_user_and_include_note_tags()
     {
         await using var dbContext = RepositoryTestContextFactory.Create();

@@ -29,6 +29,8 @@ We have completed the bootstrap step, the first domain modeling step, the EF Cor
 - the Swagger UI is now prepared for Bearer token authentication
 - registration and login endpoints are now available
 - category CRUD is now available through authenticated endpoints
+- tag CRUD is now available through authenticated endpoints
+- note CRUD is now available through authenticated endpoints
 - protected endpoints now require Bearer authentication by default unless explicitly marked as public
 
 ## Structure
@@ -234,6 +236,55 @@ Updates a category owned by the authenticated user.
 
 Deletes a category owned by the authenticated user.
 
+### `GET /api/tags`
+
+Returns the authenticated user's tags with pagination, filtering, and sorting.
+
+### `GET /api/tags/{id}`
+
+Returns a single tag owned by the authenticated user.
+
+### `POST /api/tags`
+
+Creates a tag for the authenticated user.
+
+### `PUT /api/tags/{id}`
+
+Updates a tag owned by the authenticated user.
+
+### `DELETE /api/tags/{id}`
+
+Deletes a tag owned by the authenticated user.
+
+### `GET /api/notes`
+
+Returns the authenticated user's notes with filters, pagination, and sorting.
+
+Supported filters include:
+
+- `search`
+- `categoryId`
+- `tagId`
+- `isFavorite`
+- `isArchived`
+- `isPinned`
+
+### `GET /api/notes/{id}`
+
+Returns a single note owned by the authenticated user.
+
+### `POST /api/notes`
+
+Creates a note for the authenticated user.
+
+### `PUT /api/notes/{id}`
+
+Updates a note owned by the authenticated user, including category and tag relationships.
+
+### `DELETE /api/notes/{id}`
+
+Deletes a note owned by the authenticated user.
+
 ## Swagger
 
 When the API is running, open:
@@ -337,8 +388,14 @@ dotnet test tests/StudyNotesApi.UnitTests/StudyNotesApi.UnitTests.csproj -c Rele
 .\coverage.cmd
 ```
 
-The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, security components, auth flow, and the first authenticated category CRUD slice, plus a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
+The current validation result is:
+
+- `dotnet build StudyNotesApi.sln` passing
+- `189` unit tests passing in `Release`
+- `100%` coverage on the included application files
+
+The solution now includes real unit tests for the domain, API foundation, application contract models, repository layer, security components, auth flow, and the authenticated CRUD slices for categories, tags, and notes, plus a short coverage command, global error handling, controller-based Swagger discovery, JWT wiring, and the first infrastructure/migration setup.
 
 ## Next step
 
-The next logical step is `Stage 8 - Tags CRUD`: tag DTOs, service implementation, controller endpoints, paging/filtering/sorting, and authenticated user scoping.
+The next logical step is to keep polishing the cross-cutting items continuously while the project grows: richer Swagger descriptions/examples, more behavioral tests when new rules appear, and future evolutions such as integration tests or refresh tokens.
